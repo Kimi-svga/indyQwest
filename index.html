@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Indy Carts · Trials</title>
+<meta name="description" content="Indy Carts Trials — 10 загадок. Разгадай все — получи доступ к Creator.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+  :root{
+    --bg:#0a0a0a;
+    --surface:#111111;
+    --card:#141414;
+    --card-hi:#1a1a1a;
+    --border:#1f1f1f;
+    --border-hi:#2a2a2a;
+    --text:#f5f1e8;
+    --text-soft:#a8a29e;
+    --muted:#57534e;
+    --accent:#00ff88;
+    --accent-dim:rgba(0,255,136,0.12);
+    --accent-glow:rgba(0,255,136,0.35);
+    --gold:#ffd700;
+    --gold-dim:rgba(255,215,0,0.12);
+    --danger:#ff3355;
+    --danger-dim:rgba(255,51,85,0.12);
+  }
+
+  html,body{height:100%}
+
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:32px 24px 48px;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    cursor:none;
+  }
+
+  /* ─── Кастомный курсор ─── */
+  .cursor{
+    position:fixed;
+    top:0;left:0;
+    width:36px;height:36px;
+    border:2px solid var(--accent);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:9999;
+    transform:translate(-50%,-50%);
+    transition:width 0.2s,height 0.2s,background 0.2s;
+    mix-blend-mode:difference;
+    will-change:transform;
+  }
+  .cursor-dot{
+    position:fixed;
+    top:0;left:0;
+    width:6px;height:6px;
+    background:var(--accent);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:10000;
+    transform:translate(-50%,-50%);
+    will-change:transform;
+  }
+  .cursor.hover{
+    width:60px;height:60px;
+    background:var(--accent-dim);
+  }
+  @media(hover:none){
+    .cursor,.cursor-dot{display:none}
+    body{cursor:auto}
+  }
+
+  /* ─── Loading screen ─── */
+  .loader{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:var(--bg);
+    z-index:9998;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    transition:opacity 0.8s ease,visibility 0.8s;
+  }
+  .loader.hidden{
+    opacity:0;
+    visibility:hidden;
+  }
+  .loader-logo{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:60px;
+    letter-spacing:0.1em;
+    color:var(--accent);
+    margin-bottom:32px;
+    animation:pulse 2s ease-in-out infinite;
+    text-shadow:0 0 40px var(--accent-glow);
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:0.7;transform:scale(1.02)}
+  }
+  .loader-bar{
+    width:200px;height:2px;
+    background:var(--border);
+    overflow:hidden;
+    border-radius:2px;
+  }
+  .loader-bar-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--accent),var(--gold));
+    width:0%;
+    transition:width 0.3s ease;
+    box-shadow:0 0 12px var(--accent-glow);
+  }
+  .loader-text{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin-top:16px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+  }
+
+  /* ─── Фоновый параллакс ─── */
+  .bg-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    overflow:hidden;
+  }
+  .bg-circle{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:0.5;
+    will-change:transform;
+  }
+  .bg-circle-1{
+    width:600px;height:600px;
+    background:radial-gradient(circle,rgba(0,255,136,0.15),transparent 70%);
+    top:-200px;left:-100px;
+  }
+  .bg-circle-2{
+    width:500px;height:500px;
+    background:radial-gradient(circle,rgba(255,215,0,0.1),transparent 70%);
+    bottom:-200px;right:-100px;
+  }
+  .bg-grid{
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size:60px 60px;
+    opacity:0.5;
+    will-change:transform;
+  }
+
+  .app{
+    width:100%;
+    max-width:480px;
+    position:relative;
+    z-index:1;
+    transform-style:preserve-3d;
+  }
+
+  /* ─── Header ─── */
+  .header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+    opacity:0;
+    animation:fadeDown 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:22px;
+    letter-spacing:0.08em;
+    color:var(--text);
+    position:relative;
+  }
+  .brand-icon{
+    width:28px;height:28px;
+    color:var(--accent);
+    flex-shrink:0;
+    filter:drop-shadow(0 0 8px var(--accent-glow));
+  }
+  .brand::after{
+    content:'';
+    position:absolute;
+    bottom:-6px;left:0;
+    width:100%;height:1px;
+    background:linear-gradient(90deg,var(--accent),transparent);
+    animation:lineGrow 1s ease 0.8s forwards;
+    transform-origin:left;
+    transform:scaleX(0);
+  }
+  @keyframes lineGrow{
+    to{transform:scaleX(1)}
+  }
+  .progress-text{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--accent);
+    letter-spacing:0.1em;
+    text-shadow:0 0 8px var(--accent-glow);
+  }
+  @keyframes fadeDown{
+    to{opacity:1;transform:translateY(0)}
+    from{opacity:0;transform:translateY(-8px)}
+  }
+
+  /* ─── Progress ─── */
+  .progress-bar{
+    height:2px;
+    background:var(--border);
+    border-radius:2px;
+    margin-bottom:44px;
+    overflow:hidden;
+    position:relative;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--accent),var(--gold));
+    width:0%;
+    transition:width 0.8s cubic-bezier(0.16,1,0.3,1);
+    box-shadow:0 0 16px var(--accent-glow);
+    position:relative;
+  }
+  .progress-fill::after{
+    content:'';
+    position:absolute;
+    top:0;right:0;
+    width:40px;height:100%;
+    background:linear-gradient(90deg,transparent,#fff);
+    opacity:0.6;
+  }
+
+  /* ─── Screen ─── */
+  .screen{
+    animation:slideIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes slideIn{
+    from{opacity:0;transform:translateY(30px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  /* ─── Level ─── */
+  .level-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--accent);
+    background:var(--accent-dim);
+    padding:6px 12px;
+    border-radius:100px;
+    margin-bottom:20px;
+    font-weight:500;
+    border:1px solid rgba(0,255,136,0.2);
+    opacity:0;
+    animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s forwards;
+  }
+  .level-badge svg{width:14px;height:14px}
+
+  .title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(36px,8vw,52px);
+    font-weight:400;
+    letter-spacing:0.02em;
+    line-height:1;
+    margin-bottom:10px;
+    opacity:0;
+    animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.15s forwards;
+  }
+  .subtitle{
+    font-size:14px;
+    color:var(--text-soft);
+    margin-bottom:32px;
+    opacity:0;
+    animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+  }
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  /* ─── Riddle card — 3D tilt ─── */
+  .riddle{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:36px 24px;
+    text-align:center;
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+    opacity:0;
+    animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.25s forwards;
+    transition:border-color 0.3s,transform 0.1s ease-out;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .riddle::before{
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    opacity:0.6;
+    animation:scanLine 3s linear infinite;
+  }
+  @keyframes scanLine{
+    0%{transform:translateX(-100%)}
+    100%{transform:translateX(100%)}
+  }
+  .riddle-content{
+    font-family:'JetBrains Mono',monospace;
+    font-size:clamp(20px,6vw,30px);
+    letter-spacing:0.15em;
+    color:var(--accent);
+    line-height:1.6;
+    word-break:break-word;
+    font-weight:500;
+    text-shadow:0 0 20px rgba(0,255,136,0.3);
+  }
+  .riddle-content.small{
+    font-family:'Inter',sans-serif;
+    font-size:clamp(14px,3.8vw,17px);
+    letter-spacing:0.02em;
+    color:var(--text);
+    text-align:left;
+    line-height:1.7;
+    text-shadow:none;
+  }
+  .riddle-content.small strong{
+    color:var(--accent);
+    font-weight:700;
+  }
+
+  /* ─── Input ─── */
+  .input-wrap{
+    margin-bottom:14px;
+    position:relative;
+    opacity:0;
+    animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.3s forwards;
+  }
+  .input{
+    width:100%;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+    font-size:16px;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--text);
+    outline:none;
+    transition:border-color 0.2s,box-shadow 0.2s,transform 0.2s;
+    text-align:center;
+    letter-spacing:0.05em;
+  }
+  .input::placeholder{
+    color:var(--muted);
+    letter-spacing:0.02em;
+    font-family:'Inter',sans-serif;
+  }
+  .input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-dim),0 0 24px rgba(0,255,136,0.15);
+    transform:translateY(-1px);
+  }
+  .input.error{
+    border-color:var(--danger);
+    box-shadow:0 0 0 3px var(--danger-dim);
+    animation:shake 0.5s cubic-bezier(0.36,0.07,0.19,0.97);
+  }
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    15%{transform:translateX(-10px)}
+    30%{transform:translateX(10px)}
+    45%{transform:translateX(-7px)}
+    60%{transform:translateX(7px)}
+    75%{transform:translateX(-3px)}
+    90%{transform:translateX(3px)}
+  }
+
+  /* ─── Button ─── */
+  .btn{
+    width:100%;
+    padding:18px 24px;
+    background:var(--accent);
+    color:#000;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    cursor:none;
+    transition:transform 0.15s,box-shadow 0.25s,opacity 0.2s;
+    font-family:'Bebas Neue',sans-serif;
+    position:relative;
+    overflow:hidden;
+    opacity:0;
+    animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.35s forwards;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .btn svg{width:16px;height:16px}
+  .btn::before{
+    content:'';
+    position:absolute;
+    top:50%;left:50%;
+    width:0;height:0;
+    background:rgba(255,255,255,0.5);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    transition:width 0.6s,height 0.6s;
+  }
+  .btn:active::before{
+    width:400px;height:400px;
+    transition:width 0s,height 0s;
+  }
+  .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 32px rgba(0,255,136,0.4);
+  }
+  .btn:active{transform:translateY(0)}
+  .btn:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+    transform:none;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--text-soft);
+    border:1px solid var(--border);
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    text-transform:none;
+    letter-spacing:0;
+    margin-top:10px;
+    animation-delay:0.4s;
+  }
+  .btn-ghost:hover{
+    color:var(--text);
+    border-color:var(--accent);
+    box-shadow:0 0 20px rgba(0,255,136,0.15);
+    transform:translateY(-1px);
+  }
+
+  /* ─── Hint ─── */
+  .hint{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    margin-top:24px;
+    min-height:20px;
+    opacity:0;
+    animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.45s forwards;
+    transition:color 0.3s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .hint svg{width:14px;height:14px;flex-shrink:0}
+  .hint.active{
+    color:var(--accent);
+    animation:glowPulse 2s ease-in-out infinite;
+  }
+  @keyframes glowPulse{
+    0%,100%{text-shadow:0 0 0 transparent}
+    50%{text-shadow:0 0 12px var(--accent-glow)}
+  }
+  .hint button{
+    background:none;
+    border:none;
+    color:var(--text-soft);
+    cursor:none;
+    font-size:13px;
+    font-family:inherit;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:color 0.2s;
+  }
+  .hint button:hover{color:var(--accent)}
+
+  /* ─── Error ─── */
+  .error-text{
+    text-align:center;
+    font-size:13px;
+    color:var(--danger);
+    margin-top:10px;
+    min-height:18px;
+    transition:opacity 0.2s;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  /* ─── Success ─── */
+  .success{
+    text-align:center;
+    padding:24px 0;
+  }
+  .success-icon{
+    width:96px;height:96px;
+    margin:0 auto 24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--accent);
+    animation:popRotate 0.7s cubic-bezier(0.16,1,0.3,1);
+    filter:drop-shadow(0 0 40px var(--accent-glow));
+  }
+  .success-icon svg{width:100%;height:100%}
+  @keyframes popRotate{
+    0%{transform:scale(0) rotate(-180deg);opacity:0}
+    60%{transform:scale(1.2) rotate(10deg)}
+    100%{transform:scale(1) rotate(0);opacity:1}
+  }
+  .success h2{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:44px;
+    font-weight:400;
+    letter-spacing:0.04em;
+    margin-bottom:10px;
+  }
+  .success p{
+    color:var(--text-soft);
+    font-size:15px;
+    margin-bottom:28px;
+  }
+
+  /* ─── Final ─── */
+  .final{
+    text-align:center;
+    padding:16px 0;
+    position:relative;
+  }
+  .final-icon{
+    width:96px;height:96px;
+    margin:0 auto 20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--gold);
+    animation:popRotate 0.7s cubic-bezier(0.16,1,0.3,1),floatY 3s ease-in-out infinite 0.7s;
+    filter:drop-shadow(0 0 40px rgba(255,215,0,0.5));
+  }
+  .final-icon svg{width:100%;height:100%}
+  @keyframes floatY{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+  }
+  .final h2{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:44px;
+    font-weight:400;
+    letter-spacing:0.04em;
+    margin-bottom:8px;
+    background:linear-gradient(180deg,var(--gold),#a87b00);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .final .sub{
+    color:var(--text-soft);
+    font-size:14px;
+    margin-bottom:28px;
+  }
+  .code-box{
+    background:var(--card);
+    border:1px solid var(--accent);
+    border-radius:12px;
+    padding:24px;
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 0 40px rgba(0,255,136,0.2);
+    animation:finalGlow 3s ease-in-out infinite;
+  }
+  @keyframes finalGlow{
+    0%,100%{box-shadow:0 0 40px rgba(0,255,136,0.2)}
+    50%{box-shadow:0 0 60px rgba(0,255,136,0.4)}
+  }
+  .code-box::before{
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    animation:scanLine 2s linear infinite;
+  }
+  .code-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.25em;
+    text-transform:uppercase;
+    color:var(--text-soft);
+    margin-bottom:12px;
+  }
+  .code-value{
+    font-family:'JetBrains Mono',monospace;
+    font-size:clamp(15px,4vw,20px);
+    color:var(--accent);
+    letter-spacing:0.03em;
+    word-break:break-all;
+    line-height:1.5;
+    user-select:all;
+    text-shadow:0 0 20px var(--accent-glow);
+    font-weight:500;
+  }
+  .final .note{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:24px;
+    line-height:1.6;
+  }
+  .final .note code{
+    color:var(--accent);
+    font-family:'JetBrains Mono',monospace;
+    background:var(--card-hi);
+    padding:2px 6px;
+    border-radius:4px;
+    font-size:12px;
+  }
+
+  /* ─── Disclaimer ─── */
+  .disclaimer{
+    margin-top:48px;
+    padding-top:24px;
+    border-top:1px solid var(--border);
+    font-size:10px;
+    line-height:1.7;
+    color:var(--muted);
+    letter-spacing:0.02em;
+  }
+  .disclaimer p{margin-bottom:8px}
+  .disclaimer strong{color:var(--text-soft);font-weight:600}
+  .disclaimer a{color:var(--text-soft);text-decoration:underline;text-underline-offset:2px}
+  .disclaimer a:hover{color:var(--accent)}
+
+  .footer{
+    text-align:center;
+    margin-top:24px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    color:var(--muted);
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+  }
+
+  /* ─── Конфетти ─── */
+  .confetti{
+    position:fixed;
+    top:-20px;
+    width:10px;height:10px;
+    background:var(--accent);
+    z-index:9997;
+    pointer-events:none;
+    will-change:transform;
+  }
+
+  @media(max-width:380px){
+    body{padding:24px 16px 32px}
+    .riddle{padding:28px 16px}
+  }
+</style>
+</head>
+<body>
+
+<!-- Курсор -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Loading -->
+<div class="loader" id="loader">
+  <div class="loader-logo">INDY CARTS</div>
+  <div class="loader-bar"><div class="loader-bar-fill" id="loaderBar"></div></div>
+  <div class="loader-text" id="loaderText">Загрузка · 0%</div>
+</div>
+
+<!-- Фон -->
+<div class="bg-layer">
+  <div class="bg-circle bg-circle-1" data-parallax="0.02"></div>
+  <div class="bg-circle bg-circle-2" data-parallax="-0.03"></div>
+  <div class="bg-grid" data-parallax="0.005"></div>
+</div>
+
+<div class="app">
+  <div class="header">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 256 256" fill="currentColor"><path d="M232,48V160a8,8,0,0,1-4.94,7.39C222.73,169.4,213.16,176,200,176c-17.42,0-30.39-10.27-42.31-19.65C146.91,147.47,136.6,140,124,140s-22.91,7.47-33.69,16.35C78.39,165.73,65.42,176,48,176a8,8,0,0,1,0-16c7.42,0,13.16-3.27,22.31-10.35C81.09,140.27,94.06,128,124,128s42.91,12.27,53.69,21.65C186.84,156.73,192.58,160,200,160c7.42,0,13.16-3.27,22.31-10.35C232.2,143.5,232,142.27,232,141.33V48a8,8,0,0,1,13.66-5.66l-32-32A8,8,0,0,1,232,48Z"/></svg>
+      <span>Indy Carts · Trials</span>
+    </div>
+    <span class="progress-text" id="progressText">0 / 10</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div id="screen"></div>
+
+  <div class="disclaimer">
+    <p><strong>Юридическая информация.</strong></p>
+    <p>
+      Indy Carts — <strong>независимый фанатский проект</strong>, не связанный с
+      IndyCar, INDYCAR LLC, Penske Entertainment, Chip Ganassi Racing, Team Penske,
+      Andretti Global, Arrow McLaren, Ed Carpenter Racing, Rahal Letterman Lanigan Racing,
+      A.J. Foyt Racing, Juncos Hollinger Racing, Dale Coyne Racing, Meyer Shank Racing
+      и другими командами, пилотами и организациями.
+    </p>
+    <p>
+      <strong>Ресурсы:</strong><br>
+      Иконки: <a href="https://phosphoricons.com" target="_blank" rel="noopener">Phosphor Icons</a> — MIT.<br>
+      <a href="https://pepicons.com" target="_blank" rel="noopener">Pepicons</a> — CC BY 4.0.<br>
+      <a href="https://pixelarticons.com" target="_blank" rel="noopener">Pixelarticons</a> — MIT.<br>
+      <a href="https://iconoir.com" target="_blank" rel="noopener">Iconoir</a> — MIT.
+    </p>
+    <p>
+      Шрифты: <strong>Bebas Neue</strong>, <strong>Inter</strong>,
+      <strong>JetBrains Mono</strong> — SIL OFL 1.1.
+    </p>
+  </div>
+
+  <div class="footer">Indy Carts © 2026</div>
+</div>
+
+<script>
+// ═════════════════════════════════════════════
+// КУРСОР
+// ═════════════════════════════════════════════
+
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+let mouseX = 0, mouseY = 0;
+let cursorX = 0, cursorY = 0;
+let dotX = 0, dotY = 0;
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+function animateCursor() {
+  cursorX += (mouseX - cursorX) * 0.15;
+  cursorY += (mouseY - cursorY) * 0.15;
+  dotX += (mouseX - dotX) * 0.5;
+  dotY += (mouseY - dotY) * 0.5;
+  cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+  cursorDot.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+function attachCursorHover() {
+  document.querySelectorAll('button, a, input, .riddle').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+}
+
+// ═════════════════════════════════════════════
+// ПАРАЛЛАКС
+// ═════════════════════════════════════════════
+
+const parallaxEls = document.querySelectorAll('[data-parallax]');
+let scrollY = 0;
+let parallaxY = 0;
+
+window.addEventListener('scroll', () => {
+  scrollY = window.scrollY;
+});
+
+function animateParallax() {
+  parallaxY += (scrollY - parallaxY) * 0.1;
+  parallaxEls.forEach(el => {
+    const speed = parseFloat(el.dataset.parallax);
+    el.style.transform = `translateY(${parallaxY * speed}px)`;
+  });
+  requestAnimationFrame(animateParallax);
+}
+animateParallax();
+
+// ═════════════════════════════════════════════
+// ЗВУКИ (Web Audio API)
+// ═════════════════════════════════════════════
+
+let audioCtx = null;
+let soundEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {}
+  }
+}
+
+function playSound(freq, duration = 0.08, type = 'sine', volume = 0.05) {
+  if (!soundEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+
+function soundClick() { playSound(800, 0.05, 'sine', 0.04); }
+function soundSuccess() {
+  playSound(600, 0.1, 'sine', 0.06);
+  setTimeout(() => playSound(900, 0.15, 'sine', 0.06), 80);
+  setTimeout(() => playSound(1200, 0.2, 'sine', 0.05), 180);
+}
+function soundError() {
+  playSound(200, 0.15, 'sawtooth', 0.04);
+  setTimeout(() => playSound(150, 0.2, 'sawtooth', 0.04), 100);
+}
+function soundFinal() {
+  [523, 659, 784, 1047].forEach((f, i) => {
+    setTimeout(() => playSound(f, 0.3, 'sine', 0.06), i * 120);
+  });
+}
+
+// ═════════════════════════════════════════════
+// КОНФЕТТИ
+// ═════════════════════════════════════════════
+
+function spawnConfetti() {
+  const colors = ['#00ff88', '#ffd700', '#f5f1e8', '#ff3355'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.transform = `rotate(${Math.random() * 360}deg)`;
+      el.style.opacity = '1';
+      document.body.appendChild(el);
+
+      const duration = 2000 + Math.random() * 2000;
+      const drift = (Math.random() - 0.5) * 200;
+
+      el.animate([
+        { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+        { transform: `translate(${drift}px, 100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+      ], { duration, easing: 'cubic-bezier(0.16,1,0.3,1)' })
+      .onfinish = () => el.remove();
+    }, i * 30);
+  }
+}
+
+// ═════════════════════════════════════════════
+// УРОВНИ
+// ═════════════════════════════════════════════
+
+const LEVELS = [
+  { id: 1, title: "Морзе", subtitle: "Первое послание.", riddle: ".--. . -. ... -.- .", answer: "penske", hint: "Азбука Морзе. Точки и тире.", mono: true },
+  { id: 2, title: "Числа", subtitle: "A=1, B=2, C=3...", riddle: "4 9 24 15 14", answer: "dixon", hint: "Каждое число — буква алфавита.", mono: true },
+  { id: 3, title: "Сдвиг", subtitle: "Каждая буква — на 3 назад.", riddle: "LQGB", answer: "indy", hint: "Сдвинь каждую букву назад по алфавиту.", mono: true },
+  { id: 4, title: "Пилот", subtitle: "Кто это?", riddle: "Он <strong>дважды</strong> выигрывал Indy 500 — в 2023 и 2024. Выступает за <strong>Team Penske</strong> под номером <strong>2</strong>. Американец.", answer: "newgarden", hint: "Josef ...", mono: false },
+  { id: 5, title: "Год", subtitle: "Когда это было?", riddle: "В каком году <strong>IndyCar</strong> отделился от <strong>CART</strong> и провёл первый сезон под новым названием?", answer: "1996", hint: "Середина девяностых.", mono: false },
+  { id: 6, title: "Круги", subtitle: "Число.", riddle: "Сколько <strong>кругов</strong> проезжают пилоты в <strong>Indy 500</strong>?", answer: "200", hint: "500 миль, круг — 2.5 мили.", mono: false },
+  { id: 7, title: "Легенда", subtitle: "Кто это?", riddle: "Новозеландец. <strong>6-кратный</strong> чемпион IndyCar. Выступает за <strong>Chip Ganassi Racing</strong>. Номер <strong>9</strong>.", answer: "dixon", hint: "Scott ...", mono: false },
+  { id: 8, title: "Зеркало", subtitle: "Прочитай наоборот.", riddle: "YDNI", answer: "indy", hint: "Читай справа налево.", mono: true },
+  { id: 9, title: "Основатель", subtitle: "Имя.", riddle: "Основатель команды, которая носит его фамилию. <strong>Четырёхкратный</strong> победитель Indy 500 (1961, 1964, 1967, 1977).", answer: "foyt", hint: "A.J. ...", mono: false },
+  { id: 10, title: "Финал", subtitle: "Собери всё вместе.", riddle: "Пройди все уровни — код появится ниже.", answer: "__FINAL__", hint: "Ты уже всё сделал. Нажми «Проверить».", mono: false },
+];
+
+const FINAL_CODE = "INDY-TRIALS-PENSKE-DIXON-2026";
+const STORAGE_KEY = "indycarts_trials_v3";
+
+let state = { current: 0, solved: [], hintsShown: [] };
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") state = { ...state, ...parsed };
+    }
+  } catch (e) {}
+}
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function normalize(str) { return String(str).toLowerCase().trim().replace(/\s+/g, ""); }
+function totalSolved() { return state.solved.length; }
+function isFinished() { return state.current >= LEVELS.length; }
+function escapeHtml(str) {
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function updateProgress() {
+  const solved = totalSolved();
+  const total = LEVELS.length;
+  document.getElementById("progressText").textContent = `${solved} / ${total}`;
+  document.getElementById("progressFill").style.width = `${(solved / total) * 100}%`;
+}
+
+function render() {
+  updateProgress();
+  const screen = document.getElementById("screen");
+  if (isFinished()) {
+    screen.innerHTML = renderFinal();
+    bindFinal();
+    soundFinal();
+    spawnConfetti();
+    return;
+  }
+  const level = LEVELS[state.current];
+  screen.innerHTML = renderLevel(level);
+  bindLevel(level);
+  attachCursorHover();
+  bindTilt();
+}
+
+function renderLevel(level) {
+  const hintShown = state.hintsShown.includes(level.id);
+  const riddleClass = level.mono ? "riddle-content" : "riddle-content small";
+
+  return `
+    <div class="screen">
+      <div class="level-badge">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M232,48V160a8,8,0,0,1-4.94,7.39C222.73,169.4,213.16,176,200,176c-17.42,0-30.39-10.27-42.31-19.65C146.91,147.47,136.6,140,124,140s-22.91,7.47-33.69,16.35C78.39,165.73,65.42,176,48,176a8,8,0,0,1,0-16c7.42,0,13.16-3.27,22.31-10.35C81.09,140.27,94.06,128,124,128s42.91,12.27,53.69,21.65C186.84,156.73,192.58,160,200,160c7.42,0,13.16-3.27,22.31-10.35C232.2,143.5,232,142.27,232,141.33V48a8,8,0,0,1,13.66-5.66l-32-32A8,8,0,0,1,232,48Z"/></svg>
+        Уровень ${level.id} / ${LEVELS.length}
+      </div>
+      <h1 class="title">${escapeHtml(level.title)}</h1>
+      <p class="subtitle">${escapeHtml(level.subtitle)}</p>
+
+      <div class="riddle" id="riddleCard">
+        <div class="${riddleClass}">${level.mono ? escapeHtml(level.riddle) : level.riddle}</div>
+      </div>
+
+      <div class="input-wrap">
+        <input type="text" id="answerInput" class="input" placeholder="Введи ответ..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+
+      <button class="btn" id="checkBtn">
+        Проверить
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>
+      </button>
+
+      <div class="error-text" id="errorText"></div>
+
+      <div class="hint ${hintShown ? 'active' : ''}" id="hint">
+        ${hintShown
+          ? `<svg viewBox="0 0 256 256" fill="currentColor"><path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-112a87.87,87.87,0,0,1-46.86,78.13A8,8,0,0,1,168,200H88a8,8,0,0,1-1.14-.34A88,88,0,1,1,216,120Zm-16,0a72,72,0,1,0-108,62.74A16,16,0,0,1,96,196h64a16,16,0,0,1,4-13.25A72,72,0,0,0,200,120Z"/></svg> ${escapeHtml(level.hint)}`
+          : `<button id="showHintBtn"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-112a87.87,87.87,0,0,1-46.86,78.13A8,8,0,0,1,168,200H88a8,8,0,0,1-1.14-.34A88,88,0,1,1,216,120Zm-16,0a72,72,0,1,0-108,62.74A16,16,0,0,1,96,196h64a16,16,0,0,1,4-13.25A72,72,0,0,0,200,120Z"/></svg> Показать подсказку</button>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+function renderFinal() {
+  return `
+    <div class="final screen">
+      <div class="final-icon">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M232,64a8,8,0,0,0-8-8H200V48a8,8,0,0,0-8-8H64a8,8,0,0,0-8,8V56H32a8,8,0,0,0-8,8,48.05,48.05,0,0,0,48,48h2.06A88.16,88.16,0,0,0,120,161.68V184H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V161.68A88.16,88.16,0,0,0,181.94,112H184A48.05,48.05,0,0,0,232,64ZM40,64H56v32a32,32,0,0,1-16-27.72Zm176,0h0v.28A32,32,0,0,1,200,96V56Z"/></svg>
+      </div>
+      <h2>Все уровни пройдены</h2>
+      <p class="sub">Ты разгадал все 10 загадок.</p>
+
+      <div class="code-box">
+        <div class="code-label">Твой код</div>
+        <div class="code-value" id="finalCode">${FINAL_CODE}</div>
+      </div>
+
+      <p class="note">
+        Отправь этот код в бот:<br>
+        <code>/trials ${FINAL_CODE}</code>
+      </p>
+
+      <a href="https://t.me/IndyCarts_bot" class="btn" style="display:flex;text-decoration:none">
+        Открыть бота
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>
+      </a>
+
+      <button class="btn btn-ghost" id="resetBtn">Начать заново</button>
+    </div>
+  `;
+}
+
+function bindLevel(level) {
+  const input = document.getElementById("answerInput");
+  const btn = document.getElementById("checkBtn");
+  const errorText = document.getElementById("errorText");
+  const hintEl = document.getElementById("hint");
+  const showHintBtn = document.getElementById("showHintBtn");
+
+  input.focus();
+  initAudio();
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); checkAnswer(level, input, errorText); }
+  });
+  input.addEventListener("input", () => {
+    input.classList.remove("error");
+    errorText.textContent = "";
+    soundClick();
+  });
+  btn.addEventListener("click", () => checkAnswer(level, input, errorText));
+
+  if (showHintBtn) {
+    showHintBtn.addEventListener("click", () => {
+      if (!state.hintsShown.includes(level.id)) {
+        state.hintsShown.push(level.id);
+        save();
+      }
+      hintEl.classList.add("active");
+      hintEl.innerHTML = `
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-112a87.87,87.87,0,0,1-46.86,78.13A8,8,0,0,1,168,200H88a8,8,0,0,1-1.14-.34A88,88,0,1,1,216,120Zm-16,0a72,72,0,1,0-108,62.74A16,16,0,0,1,96,196h64a16,16,0,0,1,4-13.25A72,72,0,0,0,200,120Z"/></svg>
+        ${escapeHtml(level.hint)}
+      `;
+      soundClick();
+    });
+  }
+}
+
+function bindTilt() {
+  const card = document.getElementById("riddleCard");
+  if (!card) return;
+
+  card.addEventListener("mousemove", (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    card.style.transform = `perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
+    card.style.borderColor = 'var(--accent)';
+  });
+
+  card.addEventListener("mouseleave", () => {
+    card.style.transform = "perspective(800px) rotateY(0) rotateX(0)";
+    card.style.borderColor = 'var(--border)';
+  });
+}
+
+function checkAnswer(level, input, errorText) {
+  const value = normalize(input.value);
+  if (!value) {
+    input.classList.add("error");
+    errorText.textContent = "Введи ответ";
+    soundError();
+    return;
+  }
+  if (level.answer === "__FINAL__") { markSolved(level); return; }
+  const expected = normalize(level.answer);
+  if (value === expected) {
+    markSolved(level);
+  } else {
+    input.classList.add("error");
+    errorText.textContent = "❌ Не то. Попробуй ещё.";
+    input.select();
+    soundError();
+  }
+}
+
+function markSolved(level) {
+  if (!state.solved.includes(level.id)) state.solved.push(level.id);
+  save();
+  soundSuccess();
+
+  const screen = document.getElementById("screen");
+  screen.innerHTML = `
+    <div class="success screen">
+      <div class="success-icon">
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>
+      </div>
+      <h2>Верно</h2>
+      <p>Уровень ${level.id} пройден.</p>
+      <button class="btn" id="nextBtn">
+        Дальше
+        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>
+      </button>
+    </div>
+  `;
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    state.current = level.id;
+    save();
+    render();
+  });
+
+  attachCursorHover();
+  updateProgress();
+}
+
+function bindFinal() {
+  const resetBtn = document.getElementById("resetBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if (confirm("Начать заново?")) {
+        state = { current: 0, solved: [], hintsShown: [] };
+        save();
+        render();
+      }
+    });
+  }
+  attachCursorHover();
+}
+
+// ═════════════════════════════════════════════
+// LOADER
+// ═════════════════════════════════════════════
+
+function runLoader() {
+  const bar = document.getElementById("loaderBar");
+  const text = document.getElementById("loaderText");
+  const loader = document.getElementById("loader");
+  let progress = 0;
+
+  const interval = setInterval(() => {
+    progress += Math.random() * 15 + 5;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      setTimeout(() => {
+        loader.classList.add("hidden");
+        initAudio();
+        attachCursorHover();
+      }, 400);
+    }
+    bar.style.width = progress + "%";
+    text.textContent = `Загрузка · ${Math.floor(progress)}%`;
+  }, 120);
+}
+
+// ═════════════════════════════════════════════
+// СТАРТ
+// ═════════════════════════════════════════════
+
+load();
+if (state.solved.length >= LEVELS.length) state.current = LEVELS.length;
+
+runLoader();
+render();
+</script>
+
+</body>
+</html>
